@@ -34,7 +34,7 @@ The project follows a clean, modular architecture with three main components:
 - **NLTK** - Natural language processing
 
 
-## 🚀 Main Features Implemented
+## Main Features Implemented
 
 ### 1. URL Processing
 - Regex-based YouTube URL parsing
@@ -108,7 +108,7 @@ def semantic_chunks_embeddings(text, sim_threshold=0.7, min_chunk_sentences=4):
 8. **Generate**: Create AI responses using retrieved context
 9. **Interact**: Maintain conversational flow with history
 
-## 🔐 Configuration
+## Configuration
 
 ### Environment Variables
 - `GEMINI_API_KEY`: Required for Google AI access
@@ -116,11 +116,11 @@ def semantic_chunks_embeddings(text, sim_threshold=0.7, min_chunk_sentences=4):
 ### Dependencies
 - Core ML: `sentence-transformers`, `google-generativeai`
 - Vector DB: `qdrant-client`
-- NLP: `nltk`, `spacy`
+- NLP: `nltk`
 - APIs: `youtube-transcript-api`
 - Utilities: `dotenv`, `openai` (backup option)
 
-## 🎮 Usage
+##  Usage
 
 ### Basic Operation
 ```bash
@@ -137,14 +137,14 @@ python main.py
 > Enter URL: test
 ```
 
-## 🧪 Development Features
+## Development Features
 
 - **Test Data**: Included test transcript for development
 - **Memory Storage**: Uses in-memory Qdrant for development simplicity
 - **Debug Options**: Commented debug prints throughout codebase
 - **Modular Design**: Easy to swap components (LLM providers, vector DBs, etc.)
 
-## 📈 Performance Optimizations
+## Performance Optimizations
 
 - **Batch Processing**: Efficient embedding generation
 - **Vector Similarity**: Fast cosine similarity search
