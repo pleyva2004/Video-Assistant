@@ -12,5 +12,5 @@ def get_video_id(url):
         raise ValueError(f"No video ID found in URL: {url}")
 
 if __name__ == "__main__":
-    url = "https://www.youtube.com/watch?v=NpCx0qjHlBQ&t=27s"
+    url = "https://www.youtube.com/watch?v=NpCx0qjHlBQ"
     print(get_video_id(url))

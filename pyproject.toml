@@ -5,9 +5,13 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "dotenv>=0.9.9",
+    "google>=3.0.0",
+    "google-generativeai>=0.8.5",
     "nltk>=3.9.1",
+    "openai>=1.98.0",
     "qdrant-client>=1.15.1",
-    "sentence-transformers>=5.0.0",
+    "sentence-transformers>=3.1.0",
     "spacy>=3.8.7",
     "youtube-transcript-api>=1.2.1",
 ]
