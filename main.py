@@ -85,10 +85,12 @@ def main():
     answer = client.generate_text(prompt, system_prompt)
     history = [(query, answer)]
 
-    print(f"\n\nAI: {answer}\n\n")
+    print("="*100)
+    print("Summary")
+    print(f"\033[32m\033[3mAI:\033[0m {answer}\n")
 
     while True:
-        question = input("You: ")
+        question = input("\033[94m\033[3mYou:\033[0m ")
         if question == "q":
             print("Shutting down...")
             break 
@@ -97,7 +99,7 @@ def main():
         answer = client.generate_text(prompt, system_prompt)
         history.append((question, answer))
 
-        print(f"\n\nAI: {answer}\n\n")
+        print(f"\033[32m\033[3mAI:\033[0m {answer}\n")
 
 
 if __name__ == "__main__":
