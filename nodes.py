@@ -39,8 +39,7 @@ class VideoNode(Node):
                 text = file.read()
                 raw_data = None        
         return text, raw_data, video_id
-        
-        
+             
     def post(self, shared, prep_result, exec_result):
         # Save the text to the shared state
         shared["video_text"] = exec_result[0]
@@ -53,12 +52,12 @@ class ChunkNode(Node):
     def prep(self, shared):
         chunking_params = get_chunking_params(shared["video_text"])
         shared["chunking_params"] = chunking_params
-        print(f"Chunking params: {chunking_params}")
-        return shared
+        return (shared["video_text"], shared["chunking_params"])
     
-    def exec(self, shared):
-        chunk_texts, chunk_embeddings = semantic_chunks_embeddings(shared["video_text"], **shared["chunking_params"])
-        return chunk_texts, chunk_embeddings
+    def exec(self, prep_result):
+        video_text, chunking_params = prep_result
+        chunk_texts, chunk_embeddings = semantic_chunks_embeddings(video_text, **chunking_params)
+        return (chunk_texts, chunk_embeddings)
     
     def post(self, shared, prep_result, exec_result):
         shared["chunk_texts"] = exec_result[0]
@@ -70,17 +69,10 @@ class VectorStoreNode(Node):
         shared["Qdraclient"] = QdrantClient(":memory:")
         shared["collection_name"] = "youtube_transcripts"
         shared["vector_dimension"] = shared["chunk_embeddings"][0].shape[0]
-        return shared
+        return (shared["Qdraclient"], shared["collection_name"], shared["vector_dimension"], shared["video_id"], shared["chunk_texts"], shared["chunk_embeddings"])
 
-    def exec(self, shared):
-
-        # create the collection
-        client = shared["Qdraclient"]
-        collection_name = shared["collection_name"]
-        vector_dimension = shared["vector_dimension"]
-        video_id = shared["video_id"]
-        chunk_texts = shared["chunk_texts"]
-        chunk_embeddings = shared["chunk_embeddings"]
+    def exec(self, prep_result):
+        client, collection_name, vector_dimension, video_id, chunk_texts, chunk_embeddings = prep_result
 
         if not client.collection_exists(collection_name):
             create_collection(client, collection_name, vector_dimension)
@@ -97,12 +89,10 @@ class VectorStoreNode(Node):
     
 class QueryNode(Node):
     def prep(self, shared):
-        return shared
+        return (shared["Qdraclient"], shared["collection_name"], shared["query"])
     
-    def exec(self, shared):
-        client = shared["Qdraclient"]
-        collection_name = shared["collection_name"]
-        query = shared["query"]
+    def exec(self, prep_result):
+        client, collection_name, query = prep_result
 
         results = query_qdrant(client, query, collection_name)
         return results
@@ -112,29 +102,38 @@ class QueryNode(Node):
         return "default"
     
 class GenerateAnswerNode(Node):
+
     def prep(self, shared):
         shared["LLM_client"] = GeminiClient()
-        return shared
+        return (shared["LLM_client"], shared["similarity_search_results"], shared["query"], shared["history"])
     
-    def exec(self, shared):
-        LLM_client = shared["LLM_client"]
-        similarity_search_results = shared["similarity_search_results"]
-        query = shared["query"]
+    def exec(self, prep_result):
+        LLM_client, similarity_search_results, query, history = prep_result
 
-        prompt = context_prompt(query, similarity_search_results)
+        prompt = context_prompt_history(query, similarity_search_results, history)
         system_prompt = "You are a helpful assistant that can answer questions based on the transcript context below. If you can't know the answer based on the context, ask if to search the web for the answer."
         answer = LLM_client.generate_text(prompt, system_prompt)
         print(f"\n\nAI: {answer}\n\n")
         return answer
-    
+
     def post(self, shared, prep_result, exec_result):
-        history = [(shared["query"], exec_result)]
+        history = (shared["query"], exec_result)
         shared["history"].append(history)
         shared["query"] = input("You: ")
+        if shared["query"] == "q":
+            return "quit"
+        return "continue"
+    
+class FinishNode(Node):
+    def prep(self, shared):
+        save = input("Save the history? (y/n): ")
+        if save == "y":
+            user_input = input("Enter the filename: ")
+            filename = f"history_{user_input}.json"
+            with open(filename, "w") as f:
+                json.dump(shared["history"], f)
+            print(f"History saved to {filename}")
         return "default"
     
-    
-
-        
-        
-        
+    def exec(self, shared):
+        print("Shutting down...")

@@ -9,8 +9,12 @@ def get_flow():
     vector_store_node = VectorStoreNode()
     query_node = QueryNode()
     generate_answer_node = GenerateAnswerNode()
+    finish_node = FinishNode()
 
-    video_node >> chunk_node >> vector_store_node >> query_node >> generate_answer_node >> query_node
-
+    video_node >> chunk_node >> vector_store_node >> query_node >> generate_answer_node
+    
+    generate_answer_node - "continue" >> query_node
+    generate_answer_node - "quit" >> finish_node
+    
     myFlow = Flow(start=video_node)
     return myFlow

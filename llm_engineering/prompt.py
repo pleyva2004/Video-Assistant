@@ -23,7 +23,7 @@ def context_prompt_history(question, chunks, history):
     for chunk in chunks:
         context += f"Chunk {chunk['chunk_index']}: {chunk['text']}\n\n"
 
-    for query, answer in history:
+    for query, answer in history[-5:]:
         context += f"Question: {query}\nAnswer: {answer}\n\n"
 
     prompt = f"""Answer the following question using the transcript context below and the history of the conversation:

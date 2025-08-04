@@ -54,7 +54,7 @@ def main():
 
 
     # vector store
-    client = QdrantClient(":memory:")
+    QdrantClient = QdrantClient(":memory:")
 
     collection_name = "youtube_transcripts"
     query = "what was the speaker’s main point?"
@@ -62,14 +62,14 @@ def main():
     vector_dimension = chunk_embeddings[0].shape[0]
 
     # create the collection
-    if not client.collection_exists(collection_name):
-        create_collection(client, collection_name, vector_dimension)
+    if not QdrantClient.collection_exists(collection_name):
+        create_collection(QdrantClient, collection_name, vector_dimension)
 
     # upload the chunks to the collection
-    upload_chunks_to_qdrant(client, chunk_texts, chunk_embeddings, collection_name, video_id)
+    upload_chunks_to_qdrant(QdrantClient, chunk_texts, chunk_embeddings, collection_name, video_id)
 
     # search the collection
-    results = query_qdrant(client, query, collection_name)
+    results = query_qdrant(QdrantClient, query, collection_name)
 
     # print(f"="*100)
     # print(f"\n\nQuery: {query}\n\n")
@@ -93,6 +93,7 @@ def main():
             print("Shutting down...")
             break 
 
+        results = query_qdrant(QdrantClient, question, collection_name)
         prompt = context_prompt_history(question, results, history)
         answer = client.generate_text(prompt, system_prompt)
         history.append((question, answer))
